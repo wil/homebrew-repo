@@ -8,6 +8,10 @@ class Icu4cAT621 < Formula
 
   keg_only :provided_by_macos, "macOS provides libicucore.dylib (but nothing else)"
 
+  # fix issue with LD_SONAME losing trailing space:
+  # https://unicode-org.atlassian.net/browse/ICU-20526
+  patch :p0, :DATA
+
   def install
     args = %W[
       --prefix=#{prefix}
@@ -28,3 +32,15 @@ class Icu4cAT621 < Formula
     system "#{bin}/gendict", "--uchars", "/usr/share/dict/words", "dict"
   end
 end
+__END__
+--- source/data/pkgdataMakefile.in	2021-01-28 01:57:04.000000000 +1100
++++ source/data/pkgdataMakefile.in.new	2021-01-28 01:47:45.000000000 +1100
+@@ -26,7 +26,7 @@
+ 	@echo LIBFLAGS="-I$(top_srcdir)/common -I$(top_builddir)/common $(SHAREDLIBCPPFLAGS) $(SHAREDLIBCFLAGS)" >> $(OUTPUTFILE)
+ 	@echo GENLIB="$(SHLIB.c)" >> $(OUTPUTFILE)
+ 	@echo LDICUDTFLAGS=$(LDFLAGSICUDT) >> $(OUTPUTFILE)
+-	@echo LD_SONAME=$(LD_SONAME) >> $(OUTPUTFILE)
++	@echo LD_SONAME="$(LD_SONAME)" >> $(OUTPUTFILE)
+ 	@echo RPATH_FLAGS=$(RPATH_FLAGS) >> $(OUTPUTFILE)
+ 	@echo BIR_LDFLAGS=$(BIR_LDFLAGS) >> $(OUTPUTFILE)
+ 	@echo AR=$(AR) >> $(OUTPUTFILE)
